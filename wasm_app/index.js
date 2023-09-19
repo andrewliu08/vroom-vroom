@@ -57,7 +57,9 @@ function draw_food(simulation) {
 
 function redraw() {
   ctx.clearRect(0, 0, viewport.width, viewport.height);
-  simulation.step();
+  for (let i = 0; i < 5; i++) {
+    simulation.step();
+  }
 
   draw_animals(simulation);
   draw_food(simulation);

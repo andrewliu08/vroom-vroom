@@ -35,7 +35,9 @@ impl Simulation {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         let mut rng = thread_rng();
-        let sim = sim::Simulation::random(&mut rng, 60, 60);
+        let num_animals = 5;
+        let num_food = 100;
+        let sim = sim::Simulation::random(&mut rng, num_animals, num_food);
         Self { rng, sim }
     }
 
