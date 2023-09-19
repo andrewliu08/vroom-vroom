@@ -5,7 +5,7 @@ use rand_distr::StandardNormal;
 
 pub trait Individual {
     fn from_chromosome(chromosome: Chromosome) -> Self;
-    fn as_chromosome(&self) -> Chromosome;
+    fn as_chromosome(&self) -> &Chromosome;
     fn fitness(&self) -> f64;
 }
 
@@ -25,9 +25,9 @@ impl Individual for TestIndividual {
         Self::WithChromosome { chromosome }
     }
 
-    fn as_chromosome(&self) -> Chromosome {
+    fn as_chromosome(&self) -> &Chromosome {
         match self {
-            Self::WithChromosome { chromosome } => chromosome.clone(),
+            Self::WithChromosome { chromosome } => chromosome,
             Self::WithFitness { .. } => panic!("Not supported for TestIndividual::WithFitness"),
         }
     }

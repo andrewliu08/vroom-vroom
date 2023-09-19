@@ -44,6 +44,14 @@ impl Simulation {
         to_value(&world).unwrap()
     }
 
+    pub fn generation(&self) -> u32 {
+        self.sim.generation()
+    }
+
+    pub fn generation_steps(&self) -> u32 {
+        self.sim.generation_steps()
+    }
+
     pub fn step(&mut self) {
         self.sim.step(&mut self.rng);
     }

@@ -38,10 +38,42 @@ impl MLP {
         Self { layers }
     }
 
+    pub fn from_weight_and_biases(
+        mut nin: usize,
+        nouts: &[usize],
+        weights: impl IntoIterator<Item = f64>,
+    ) -> Self {
+        let mut weights = weights.into_iter();
+
+        let mut layers = Vec::with_capacity(nouts.len());
+        for nout in nouts {
+            layers.push(Layer::from_weight_and_biases(nin, *nout, &mut weights));
+            nin = *nout;
+        }
+
+        Self { layers }
+    }
+
     pub fn forward(&self, inputs: Vec<f64>) -> Vec<f64> {
         self.layers
             .iter()
             .fold(inputs, |inputs, layer| layer.forward(&inputs))
+    }
+
+    pub fn weights_and_biases(&self) -> Vec<f64> {
+        let mut weights = Vec::new();
+
+        for layer in &self.layers {
+            for neuron in &layer.neurons {
+                weights.push(neuron.bias);
+
+                for weight in &neuron.weights {
+                    weights.push(*weight);
+                }
+            }
+        }
+
+        weights
     }
 }
 
@@ -54,6 +86,19 @@ impl Layer {
         let neurons = (0..nout)
             .map(|_| Neuron::random_weights(rng, nin, bias))
             .collect();
+        Self { neurons }
+    }
+
+    pub fn from_weight_and_biases(
+        nin: usize,
+        nout: usize,
+        weights: &mut dyn Iterator<Item = f64>,
+    ) -> Self {
+        let mut neurons = Vec::with_capacity(nout);
+        for _ in 0..nout {
+            neurons.push(Neuron::from_weight_and_biases(nin, weights));
+        }
+
         Self { neurons }
     }
 
@@ -77,6 +122,18 @@ impl Neuron {
         // e.g. 0.01, 0.1, 1.0
         let weights: Vec<f64> = (0..nin).map(|_| rng.gen_range(-1.0..=1.0)).collect();
         Self { weights, bias }
+    }
+
+    pub fn from_weight_and_biases(nin: usize, weights: &mut dyn Iterator<Item = f64>) -> Self {
+        let bias = weights.next().expect("Not enough weights");
+        let neuron_weights = (0..nin)
+            .map(|_| weights.next().expect("Not enough weights"))
+            .collect();
+
+        Self {
+            weights: neuron_weights,
+            bias,
+        }
     }
 
     pub fn forward(&self, inputs: &[f64]) -> f64 {

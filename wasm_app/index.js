@@ -62,6 +62,9 @@ function redraw() {
   draw_animals(simulation);
   draw_food(simulation);
   requestAnimationFrame(redraw);
+
+  console.log("Generation: ", simulation.generation());
+  console.log("Generation steps: ", simulation.generation_steps());
 }
 
 draw_animals(simulation);
