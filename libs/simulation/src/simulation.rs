@@ -6,6 +6,7 @@ use rand::RngCore;
 use lib_reinforcement_learning::genetic_algorithm as ga;
 
 use crate::animal::{Animal, AnimalIndividual};
+use crate::generation_statistics::GenerationStatistics;
 use crate::world::World;
 
 const GENERATION_STEPS: u32 = 1000;
@@ -23,6 +24,7 @@ pub struct Simulation {
     >,
     generation: u32,
     generation_steps: u32,
+    generation_statistics: Vec<GenerationStatistics>,
 }
 
 impl Simulation {
@@ -38,6 +40,7 @@ impl Simulation {
             evolver,
             generation: 0,
             generation_steps: 0,
+            generation_statistics: Vec::new(),
         }
     }
 
@@ -51,6 +54,10 @@ impl Simulation {
 
     pub fn generation_steps(&self) -> u32 {
         self.generation_steps
+    }
+
+    pub fn prev_generation_statistics(&self) -> Option<&GenerationStatistics> {
+        self.generation_statistics.last()
     }
 
     pub fn process_brains(&mut self) {
@@ -93,17 +100,6 @@ impl Simulation {
         }
     }
 
-    pub fn step(&mut self, rng: &mut dyn RngCore) {
-        self.generation_steps += 1;
-        if self.generation_steps >= GENERATION_STEPS {
-            self.evolve(rng);
-        }
-
-        self.eat_food(rng);
-        self.process_brains();
-        self.move_animals();
-    }
-
     pub fn evolve(&mut self, rng: &mut dyn RngCore) {
         self.generation += 1;
         self.generation_steps = 0;
@@ -114,6 +110,8 @@ impl Simulation {
             .iter()
             .map(|animal| AnimalIndividual::from_animal(animal))
             .collect();
+        self.generation_statistics
+            .push(GenerationStatistics::from_population(&curr_population));
 
         let new_population: Vec<Animal> = self
             .evolver
@@ -126,6 +124,17 @@ impl Simulation {
 
         for food in &mut self.world.food {
             food.randomize_position(rng);
+        }
+    }
+
+    pub fn step(&mut self, rng: &mut dyn RngCore) {
+        self.generation_steps += 1;
+        if self.generation_steps > GENERATION_STEPS {
+            self.evolve(rng);
+        } else {
+            self.eat_food(rng);
+            self.process_brains();
+            self.move_animals();
         }
     }
 }

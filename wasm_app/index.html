@@ -2,16 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="./index.css"/>
     <title>Vroom</title>
   </head>
-  <style>
-    body {
-      background: black;
-    }
-  </style>
   <body>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-    <canvas id="viewport" width="350" height="350"></canvas>
+    <div id="flex-container">
+      <canvas id="simulation"></canvas>
+      <div id="controller">
+        <p id="controllerText"></p>
+      </div>
+    </div>
     <script src="./bootstrap.js"></script>
   </body>
 </html>

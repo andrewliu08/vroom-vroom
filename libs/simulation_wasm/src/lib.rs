@@ -12,6 +12,14 @@ pub struct Simulation {
 }
 
 #[derive(Clone, Debug, Serialize)]
+pub struct GenerationStatistics {
+    max_fitness: f64,
+    min_fitness: f64,
+    mean_fitness: f64,
+    std_fitness: f64,
+}
+
+#[derive(Clone, Debug, Serialize)]
 pub struct World {
     animals: Vec<Animal>,
     food: Vec<Food>,
@@ -35,8 +43,8 @@ impl Simulation {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         let mut rng = thread_rng();
-        let num_animals = 5;
-        let num_food = 100;
+        let num_animals = 32;
+        let num_food = 128;
         let sim = sim::Simulation::random(&mut rng, num_animals, num_food);
         Self { rng, sim }
     }
@@ -54,8 +62,29 @@ impl Simulation {
         self.sim.generation_steps()
     }
 
+    pub fn prev_generation_statistics(&self) -> JsValue {
+        if let Some(stats) = self.sim.prev_generation_statistics() {
+            let stats = GenerationStatistics::from(stats);
+            to_value(&stats).unwrap()
+        } else {
+            let stats: Option<GenerationStatistics> = None;
+            to_value(&stats).unwrap()
+        }
+    }
+
     pub fn step(&mut self) {
         self.sim.step(&mut self.rng);
+    }
+}
+
+impl From<&sim::GenerationStatistics> for GenerationStatistics {
+    fn from(value: &sim::GenerationStatistics) -> Self {
+        GenerationStatistics {
+            max_fitness: value.max_fitness,
+            min_fitness: value.min_fitness,
+            mean_fitness: value.mean_fitness,
+            std_fitness: value.std_fitness,
+        }
     }
 }
 
